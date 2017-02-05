@@ -6,7 +6,7 @@
 #include <glpng/glpng.h>
 #else
 #include <GL/glut.h>
-#include <glpng/glpng.h>
+#include <GL/glpng.h>
 #endif
 
 #define PADDING_WIDTH  (50)
