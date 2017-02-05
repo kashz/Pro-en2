@@ -5,7 +5,7 @@
 
 SRC_DIR=./src
 OBJ_DIR=./obj
-MEDIA_DIR=./media
+MEDIA_DIR=./assets
 
 UNAME_S := $(shell uname -s)
 
