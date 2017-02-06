@@ -25,6 +25,7 @@ void Timer (int value) {
     glutPostRedisplay();
     glutTimerFunc(100, Timer, 0);
 }
+// 相手がどの線を選ぶかを時間差でやるための関数
 void NpcTimer (int value) {
     npc_select();
 }

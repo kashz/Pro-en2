@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// ゲームの画像
 Image blocks[4];
 Image junction;
 Image bars[2][2];
@@ -31,6 +32,7 @@ int map[11][11] = {
 
 GameInfo game_info;
 
+// ゲームの状態を初期化
 void init_game_info() {
     game_info.state = GAME_TITLE;
     game_info.turn = OWN_TURN;
@@ -38,6 +40,7 @@ void init_game_info() {
     game_info.npc_score = 0;
 }
 
+// ゲームで使う画像をすべて読み込む
 void load_images() {
     int i, j;
     char name[30];
@@ -75,6 +78,7 @@ void load_images() {
     LoadSprite(&result_lose, "assets/result_lose.png");
     LoadSprite(&result_return, "assets/result_return.png");
 }
+
 void draw_game() {
     if (game_info.state == GAME_TITLE) {
         PutSprite(&title, 0, 0);
@@ -83,70 +87,12 @@ void draw_game() {
         if (check_clear()) {
             repair_map();
             game_info.state = GAME_RESULT;
-            print_map();
-            printf("clear\n");
         }
     } else if (game_info.state == GAME_RESULT) {
         draw_result();
     }
 }
 
-void draw_result() {
-    PutSprite(&result_title, 0, 0);
-    if (game_info.score > game_info.npc_score) {
-        PutSprite(&result_win, 0, 180);
-    } else {
-        PutSprite(&result_lose, 0, 180);
-    }
-    PutSprite(&result_return, 0, 500);
-}
-
-void repair_map() {
-    int i, j;
-
-    // 各ブロックをリセット
-    for (i = 1; i < 11; i += 2) {
-        for (j = 1; j < 11; j += 2) {
-            if (map[j][i] != 0) {
-                map[j][i] = 0;
-            }
-        }
-    }
-    // 辺をリセット
-    // 横の辺
-    for (i = 1; i < 11; i+= 2) {
-        for (j = 0; j < 11; j+= 2) {
-            if (map[j][i] != 1) {
-                map[j][i] = 1;
-            }
-        }
-    }
-    // 縦の辺
-    for (i = 0; i < 11; i += 2) {
-        for (j = 1; j < 11; j += 2) {
-            if (map[j][i] != 1) {
-                map[j][i] = 1;
-            }
-        }
-    }
-}
-int check_clear() {
-    int status = 1;
-    int i, j;
-
-    for (i = 1; i < 11; i += 2) {
-        for (j = 1; j < 11; j += 2) {
-            if (map[j][i] == 0) {
-                status = 0;
-                break;
-            }
-        }
-        if (status == 0) {
-            break;
-        }
-    }
-    return status;
-}
 void draw_map() {
     int i, j;
 
@@ -196,6 +142,8 @@ void draw_map() {
     PutSprite(&score_board, 0, 500 + PADDING_HEIGHT);
     draw_score(50, 600,  game_info.score);
     draw_score(450, 600, game_info.npc_score);
+
+    // どちらのターンなのかを表示
     if (game_info.turn == OWN_TURN) {
         PutSprite(&game_messages[0], 0, 600);
     } else if (game_info.turn == NPC_TURN) {
@@ -203,47 +151,56 @@ void draw_map() {
     }
 }
 
-void LoadSprite(Image* image, char* name) {
-    image->img = pngBind(name, PNG_NOMIPMAP, PNG_ALPHA, &image->info, GL_CLAMP, GL_NEAREST, GL_NEAREST);
+void draw_result() {
+    // 結果画面を描画する
+    PutSprite(&result_title, 0, 0);
+    if (game_info.score > game_info.npc_score) {
+        PutSprite(&result_win, 0, 180);
+    } else {
+        PutSprite(&result_lose, 0, 180);
+    }
+    PutSprite(&result_return, 0, 500);
 }
 
-void PutSprite(Image* image, int x, int y) {
-    int w, h;  //  テクスチャの幅と高さ
-    int tmp_img = image->img;
+void draw_score(int x, int y, int score) {
+    int index;
 
-    w = image->info.Width;   //  テクスチャの幅と高さを取得する
-    h = image->info.Height;
-
-
-    glPushMatrix();
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, tmp_img);
-    glColor4ub(255, 255, 255, 255);
-
-    glBegin(GL_QUADS);  //  幅w, 高さhの四角形
-
-    glTexCoord2i(0, 0);
-    glVertex2i(x, y);
-
-    glTexCoord2i(0, 1);
-    glVertex2i(x, y + h);
-
-    glTexCoord2i(1, 1);
-    glVertex2i(x + w, y + h);
-
-    glTexCoord2i(1, 0);
-    glVertex2i(x + w, y);
-
-    glEnd();
-
-    glDisable(GL_TEXTURE_2D);
-    glPopMatrix();
+    // 百の位
+    index = (score / 100) % 10;
+    PutSprite(&numbers[index], x, y);
+    // 十の位
+    index = (score / 10)  % 10;
+    PutSprite(&numbers[index], x + 30, y);
+    // 一の位
+    index = score % 10;
+    PutSprite(&numbers[index], x + 60, y);
 }
 
-int check_end() {
+void check_surrounded() {
     int i, j;
-    int status = 1;
 
+    for (i = 1; i < 11; i += 2) {
+        for (j = 1; j < 11; j += 2) {
+            if (map[j][i] == 0 && map[j][i+1] == 2 &&
+                map[j][i-1] == 2 && map[j+1][i] == 2 && map[j-1][i] == 2) {
+                // 囲まれていればターンに応じて得点
+                if (game_info.turn == OWN_TURN) {
+                    map[j][i] = 1;
+                    game_info.score += 30;
+                } else if (game_info.turn == NPC_TURN) {
+                    map[j][i] = 2;
+                    game_info.npc_score += 30;
+                }
+            }
+        }
+    }
+}
+
+int check_clear() {
+    int status = 1;
+    int i, j;
+
+    // すべての四角を確認して0でなければクリア
     for (i = 1; i < 11; i += 2) {
         for (j = 1; j < 11; j += 2) {
             if (map[j][i] == 0) {
@@ -256,24 +213,6 @@ int check_end() {
         }
     }
     return status;
-}
-void check_surrounded() {
-    int i, j;
-
-    for (i = 1; i < 11; i += 2) {
-        for (j = 1; j < 11; j += 2) {
-            if (map[j][i] == 0 && map[j][i+1] == 2 &&
-                map[j][i-1] == 2 && map[j+1][i] == 2 && map[j-1][i] == 2) {
-                if (game_info.turn == OWN_TURN) {
-                    map[j][i] = 1;
-                    game_info.score += 30;
-                } else if (game_info.turn == NPC_TURN) {
-                    map[j][i] = 2;
-                    game_info.npc_score += 30;
-                }
-            }
-        }
-    }
 }
 
 void click(int x, int y) {
@@ -298,31 +237,16 @@ void click(int x, int y) {
             status = 1;
         }
     }
+    // 線を引いたら確認
     if (status) {
+        // 囲われた四角を確認
         check_surrounded();
         game_info.turn = NPC_TURN;
+        // 2秒後にNPCの攻撃
         glutTimerFunc(2000, NpcTimer, 0);
     }
 }
-void print_map() {
-    int i, j;
-    for (i = 0; i < 11; i++) {
-        for (j = 0; j < 11; j++) {
-            printf("%2d", map[i][j]);
-        }
-        printf("\n");
-    }
-}
-void draw_score(int x, int y, int score) {
-    int index;
 
-    index = (score / 100) % 10;
-    PutSprite(&numbers[index], x, y);
-    index = (score / 10)  % 10;
-    PutSprite(&numbers[index], x + 30, y);
-    index = score % 10;
-    PutSprite(&numbers[index], x + 60, y);
-}
 void npc_select() {
     int i, j;
     int status = 0;
@@ -354,13 +278,81 @@ void npc_select() {
         while(1) {
             num1 = random() % 11;
             num2 = random() % 11;
+            // 奇数と偶数である場合は，配列内の棒のインデックス
             if (((num1 % 2) + (num2 % 2)) == 1 && map[num1][num2] == 1) {
                 map[num1][num2] = 2;
                 break;
             }
         }
-        printf("%d, %d\n", num1, num2);
     }
+    // 得点を確認
     check_surrounded();
+    // ターンを戻す
     game_info.turn = OWN_TURN;
+}
+void repair_map() {
+    int i, j;
+
+    // 各ブロックをリセット
+    for (i = 1; i < 11; i += 2) {
+        for (j = 1; j < 11; j += 2) {
+            if (map[j][i] != 0) {
+                map[j][i] = 0;
+            }
+        }
+    }
+    // 辺をリセット
+    // 横の辺を元に戻す
+    for (i = 1; i < 11; i+= 2) {
+        for (j = 0; j < 11; j+= 2) {
+            if (map[j][i] != 1) {
+                map[j][i] = 1;
+            }
+        }
+    }
+    // 縦の辺を元に戻す
+    for (i = 0; i < 11; i += 2) {
+        for (j = 1; j < 11; j += 2) {
+            if (map[j][i] != 1) {
+                map[j][i] = 1;
+            }
+        }
+    }
+}
+
+void LoadSprite(Image* image, char* name) {
+    // 画像の読み込み
+    image->img = pngBind(name, PNG_NOMIPMAP, PNG_ALPHA, &image->info, GL_CLAMP, GL_NEAREST, GL_NEAREST);
+}
+
+void PutSprite(Image* image, int x, int y) {
+    int w, h;  //  テクスチャの幅と高さ
+    int tmp_img = image->img;
+
+    w = image->info.Width;   //  テクスチャの幅と高さを取得する
+    h = image->info.Height;
+
+    glPushMatrix();
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, tmp_img);
+    glColor4ub(255, 255, 255, 255);
+
+    glBegin(GL_QUADS);  //  幅w, 高さhの四角形
+
+    glTexCoord2i(0, 0);
+    glVertex2i(x, y);
+
+    glTexCoord2i(0, 1);
+    glVertex2i(x, y + h);
+
+    glTexCoord2i(1, 1);
+    glVertex2i(x + w, y + h);
+
+    glTexCoord2i(1, 0);
+    glVertex2i(x + w, y);
+
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+    glPopMatrix();
 }
