@@ -1,4 +1,5 @@
 #include "./game.h"
+#include "./event.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -300,7 +301,7 @@ void click(int x, int y) {
     if (status) {
         check_surrounded();
         game_info.turn = NPC_TURN;
-        npc_select();
+        glutTimerFunc(2000, NpcTimer, 0);
     }
 }
 void print_map() {

@@ -25,6 +25,9 @@ void Timer (int value) {
     glutPostRedisplay();
     glutTimerFunc(100, Timer, 0);
 }
+void NpcTimer (int value) {
+    npc_select();
+}
 void Keyboard(unsigned char key, int x, int y) {
     if (key == 'q' || key == 27) {
         printf("exit...\n");
