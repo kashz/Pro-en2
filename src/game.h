@@ -10,7 +10,7 @@
 #endif
 
 #define PADDING_WIDTH  (50)
-#define PADDING_HEIGHT (20)
+#define PADDING_HEIGHT (50)
 
 #define GAME_TITLE    (0)
 #define GAME_PLAYING  (1)

@@ -19,7 +19,7 @@ void Reshape (int x, int y) {
     glScaled(1, -1, 1);
     glTranslated(0, -y, 0);
     // ウィンドウサイズを固定にする
-    glutReshapeWindow(600, 700);
+    glutReshapeWindow(800, 600);
 }
 void Timer (int value) {
     glutPostRedisplay();

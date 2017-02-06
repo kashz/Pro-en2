@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     srandom(time(NULL));
 
     glutInit(&argc, argv);
-    glutInitWindowSize(600, 700);
+    glutInitWindowSize(600, 600);
     glutCreateWindow("Children's Games");
     glutDisplayFunc(Display);
     glutReshapeFunc(Reshape);

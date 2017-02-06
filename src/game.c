@@ -139,15 +139,15 @@ void draw_map() {
     }
 
     // スコアボードの表示
-    PutSprite(&score_board, 0, 500 + PADDING_HEIGHT);
-    draw_score(50, 600,  game_info.score);
-    draw_score(450, 600, game_info.npc_score);
+    PutSprite(&score_board, 580, 0 + PADDING_HEIGHT);
+    draw_score(660, 140,  game_info.score);
+    draw_score(660, 340, game_info.npc_score);
 
     // どちらのターンなのかを表示
     if (game_info.turn == OWN_TURN) {
-        PutSprite(&game_messages[0], 0, 600);
+        PutSprite(&game_messages[0], 580, 440);
     } else if (game_info.turn == NPC_TURN) {
-        PutSprite(&game_messages[1], 0, 600);
+        PutSprite(&game_messages[1], 580, 440);
     }
 }
 
@@ -155,11 +155,11 @@ void draw_result() {
     // 結果画面を描画する
     PutSprite(&result_title, 0, 0);
     if (game_info.score > game_info.npc_score) {
-        PutSprite(&result_win, 0, 180);
+        PutSprite(&result_win, 0, 150);
     } else {
-        PutSprite(&result_lose, 0, 180);
+        PutSprite(&result_lose, 0, 150);
     }
-    PutSprite(&result_return, 0, 500);
+    PutSprite(&result_return, 0, 400);
 }
 
 void draw_score(int x, int y, int score) {
@@ -222,16 +222,16 @@ void click(int x, int y) {
     // 縦の判定
     if (x % 100 > 35 && x % 100 < 65) {
         i = x / 100 * 2;
-        j = (y - 20) / 100 * 2 + 1;
+        j = (y - 50) / 100 * 2 + 1;
         if (i < 11 && j < 11 && map[j][i] == 1) {
             map[j][i] = 2;
             status = 1;
         }
     }
     // 横の判定
-    else if (y % 100 > 5 && y % 100 < 35) {
+    else if (y % 100 > 35 && y % 100 < 65) {
         i = (x - 50) / 100 * 2 + 1;
-        j = y / 100 * 2;
+        j = (y) / 100 * 2;
         if (i < 11 && j < 11 && map[j][i] == 1) {
             map[j][i] = 2;
             status = 1;
